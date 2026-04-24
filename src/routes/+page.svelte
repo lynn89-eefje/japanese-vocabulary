@@ -1,6 +1,126 @@
 <script>
     import { base } from "$app/paths";
-    import { slide } from "svelte/transition";
+    import { fade, slide } from "svelte/transition";
+    import { onMount } from "svelte";
+
+    let screen = {
+        "x": 0,
+        "y": 0
+    }
+
+    // 48% of these words will be tested in pre-post
+    let japanese = [
+        [
+            "あか",
+            "Red"
+        ],
+        [
+            "あお",
+            "Blue"
+        ],
+        [
+            "しち",
+            "Seven"
+        ],
+        [
+            "ひる",
+            "Afternoon"
+        ],
+        [
+            "きゅう",
+            "Nine"
+        ],
+        [
+            "しろ",
+            "White"
+        ],
+        [
+            "なん",
+            "Minute"
+        ],
+        [
+            "くろ",
+            "Black"
+        ],
+        [ 
+            "こんにちは",
+            "Good Afternoon"
+        ],
+        [
+            "ようび",
+            "Day of the Week"
+        ],
+        [
+            "きんようび",
+            "Friday"
+        ],
+        [
+            "フラワー",
+            "Flower"
+        ],
+        [
+            "ピンク",
+            "Pink"
+        ],
+        [
+            "犬",
+            "Dog"
+        ],
+        [
+            "ナイト",
+            "Night"
+        ],
+        [
+            "キノコ",
+            "Mushroom"
+        ],
+        [
+            "川",
+            "River"
+        ],
+        [
+            "ジュース",
+            "Juice"
+        ],
+        [
+            "ティー",
+            "Tea"
+        ],
+        [
+            "マウンテン",
+            "Mountain"
+        ],
+        [
+            "オーシャン", 
+            "Ocean"
+        ],
+        [
+            "ボート",
+            "Boat"
+        ],
+        [
+            "火",
+            "Fire"
+        ],
+        [
+            "木",
+            "Tree"
+        ],
+        [
+            "マネー",
+            "Money"
+        ],
+        [
+            "ミルク",
+            "Milk"
+        ]
+    ]
+
+    let gameStatus = 0;
+
+    onMount(() => {
+        console.log(japanese);
+    })
 </script>
 
 <style>
@@ -42,11 +162,16 @@
         color: rgb(136, 61, 33);
     }
 </style>
+<svelte:window></svelte:window>
 <div id="container">
     <div style:margin-top=80px>
-        <h1>Japanese Vocabulary Game</h1>
-        <p>Let's learn Japanese!</p>
-        <p><button>Start</button></p>
+        {#if gameStatus == 0}
+        <div out:fade>
+            <h1>Japanese Vocabulary Game</h1>
+            <p>Let's learn Japanese!</p>
+            <p><button onclick={function() {gameStatus = 1;}}>Start</button></p>
+        </div>
+        {/if}
     </div>
 </div>
 

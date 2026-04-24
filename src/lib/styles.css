@@ -1,0 +1,25 @@
+h1, h3, h4, h5, h6, p {
+    font-family: Montserrat;
+    text-align: center;
+    color: white;
+}
+h1 {
+    font-weight: 900;
+}
+h2 {
+    font-weight: 700;
+    font-family: Space Grotesk, Montserrat;
+}
+button {
+    padding: 10px;
+    border-radius: 20px;
+    font-size: 20px;
+    text-align: center;
+    border: none;
+    font-family: Space Grotesk;
+    transition: all 0.1s ease-in-out;
+}
+button:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}

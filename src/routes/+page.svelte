@@ -1,12 +1,7 @@
 <script>
     import { base } from "$app/paths";
-    import { fade, slide } from "svelte/transition";
+    import { fade, fly, slide } from "svelte/transition";
     import { onMount } from "svelte";
-
-    let screen = {
-        "x": 0,
-        "y": 0
-    }
 
     // 48% of these words will be tested in pre-post
     let japanese = [
@@ -21,10 +16,6 @@
         [
             "しち",
             "Seven"
-        ],
-        [
-            "ひる",
-            "Afternoon"
         ],
         [
             "きゅう",
@@ -53,6 +44,18 @@
         [
             "きんようび",
             "Friday"
+        ],
+        [
+            "どようび",
+            "Saturday"
+        ],
+        [
+            "くがつ",
+            "September"
+        ],
+        [
+            "じゅうがつ",
+            "October"
         ],
         [
             "フラワー",
@@ -113,16 +116,95 @@
         [
             "ミルク",
             "Milk"
+        ],
+        [
+            "とけい",
+            "Clock"
+        ],
+        [
+            "ちいさい",
+            "Small"
+        ],
+        [
+            "むずかしい",
+            "Difficult"
+        ],
+        [
+            "ちゃ",
+            "Tea"
         ]
     ]
 
-    let gameStatus = 0;
+    let gameStatus = $state(0);
+    let answerStatus = $state(0);
+
+    let round = $state({
+        "curr": "",
+        "corr": "",
+        "choices": []
+    });
+
+    function generateRound() {
+        round.choices = [];
+        let rand = Math.floor((Math.random() * japanese.length));
+        round.curr = japanese[rand][0];
+        round.corr = japanese[rand][1];
+
+        let corrIndex = Math.floor(Math.random() * 4);
+        for (let i = 0; i < 4; i++) {
+            if (corrIndex == i) {
+                round.choices.push(round.corr);
+            }
+            else {
+                let rand2 = Math.floor((Math.random() * japanese.length));
+                if (rand2 == rand) {
+                    i--;
+                    continue;
+                }
+                else if (checkChoices(japanese[rand2][1])) {
+                    round.choices.push(japanese[rand2][1]);
+                }
+                else {
+                    i--; 
+                }
+            }
+        }
+        console.log(round.choices);
+    }
+
+    function checkChoices(choice) {
+        for (let i = 0; i < round.choices.length; i++) {
+            if (round.choices[i] == choice) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    let correctEmote = $state(true);
+    function progress (correct) {
+        setTimeout(function() {answerStatus = 1}, 500);
+        if (correct) {
+            setTimeout(()=> {answerStatus = 0; gameStatus = 2; generateRound()}, 2500);
+            setTimeout(function() {gameStatus = 1}, 3000);
+        }
+        else {
+            setTimeout(function() {correctEmote = false}, 500)
+            //console.log(correct);
+            setTimeout(()=> {answerStatus = 0; gameStatus = 2; generateRound()}, 3500);
+            setTimeout(function() {gameStatus = 1; correctEmote = true}, 4000);
+        }
+    }
 
     onMount(() => {
-        console.log(japanese);
+        generateRound();
     })
-</script>
 
+</script>
+<svelte:head>
+    <link rel="preload" as="image" href="{base}/images/imke.png"/>
+    <link rel="preload" as="image" href="{base}/images/imkeAngry.png"/>
+</svelte:head>
 <style>
     #container {
         position: fixed;
@@ -161,10 +243,32 @@
         background-color: white;
         color: rgb(136, 61, 33);
     }
+
+    #choices {
+        display: flex;
+        justify-content: center;
+        button {
+            padding: 20px;
+            margin: 8px;
+            user-select: none;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button.correct {
+            background-color: lightgreen;
+            color: rgb(53, 99, 53);
+            transform: scale(1);
+        }
+        button.incorrect {
+            background-color: lightcoral;
+            color: rgb(92, 49, 49);
+            transform: scale(1);
+        }
+    }
 </style>
-<svelte:window></svelte:window>
 <div id="container">
-    <div style:margin-top=80px>
+    <div style:margin-top=60px>
         {#if gameStatus == 0}
         <div out:fade>
             <h1>Japanese Vocabulary Game</h1>
@@ -172,9 +276,28 @@
             <p><button onclick={function() {gameStatus = 1;}}>Start</button></p>
         </div>
         {/if}
+        {#if gameStatus == 1}
+        <div style:text-align="center" in:fly={{delay: 1000, y:100}} out:fade>
+            <h1 translate="no" style:user-select="none">{round.curr}</h1>
+            <h2 style:color="white">Translate this word into its English equivalent</h2>
+            <div id="choices">
+                {#each round.choices as x}
+                    {#if x == round.corr}
+                    <button class:correct={answerStatus == 1} disabled={answerStatus == 1} onclick={() => {progress(true)}}>{x}</button>
+                    {:else}
+                    <button class:incorrect={answerStatus == 1} disabled={answerStatus == 1} onclick={() => {progress(false)}}>{x}</button>
+                    {/if}
+                {/each}
+            </div>
+        </div>
+        {/if}
     </div>
 </div>
 
 <div id="bird">
+    {#if correctEmote}
     <img src="{base}/images/imke.png" alt="Bird"/>
+    {:else}
+    <img src="{base}/images/imkeAngry.png" alt="Bird"/>
+    {/if}
 </div>

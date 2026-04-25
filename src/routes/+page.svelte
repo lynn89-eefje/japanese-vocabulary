@@ -2,9 +2,8 @@
     import { base } from "$app/paths";
     import { fade, fly, slide } from "svelte/transition";
     import { onMount } from "svelte";
-    import { passive } from "svelte/legacy";
+    //import { passive } from "svelte/legacy"; <- This autoimported and I'm not sure why
 
-    // 48% of these words will be tested in pre-post
     let japanese = [
         [
             "あか",
@@ -202,14 +201,17 @@
     function progress (correct) {
         setTimeout(function() {answerStatus = 1}, 500);
         if (correct) {
+            setTimeout(function() {streak++; correctAnswers++}, 500);
             setTimeout(()=> {answerStatus = 0; gameStatus = 2; generateRound()}, 2500);
             setTimeout(function() {gameStatus = 1}, 3000);
         }
         else {
             setTimeout(function() {correctEmote = false}, 500)
+            setTimeout(function() {streak = 0}, 1000)
             //console.log(correct);
             setTimeout(()=> {answerStatus = 0; gameStatus = 2; generateRound()}, 3500);
             setTimeout(function() {gameStatus = 1; correctEmote = true}, 4000);
+            streak = 0;
         }
     }
 
@@ -220,7 +222,7 @@
     })
 
     let timerMode = $state(0);
-    let timer = $state(420); // Set to seconds
+    let timer = $state(420);
     let timerString = $state("");
     onMount(() => {
         window.setInterval(timerCount, 1000);
@@ -228,12 +230,12 @@
     function timerCount() {
         if (timerMode == 1) {
             timerString = convertTimerString();
-            console.log(timer);
+            //console.log(timer);
             timer--;
-            if (timer < 0) {
-                timerMode = 0;
-                gameStatus = 3;
-            }
+        }
+        if (timer < -1) {
+            timerMode = 0;
+            gameStatus = 3;
         }
     }
     function convertTimerString() {
@@ -246,6 +248,9 @@
         return str;
     }
 
+    let correctAnswers = $state(0);
+    let streak = $state(0);
+
 </script>
 <svelte:head>
     <link rel="preload" as="image" href="{base}/images/imke.png"/>
@@ -255,6 +260,7 @@
     #container {
         position: fixed;
         transform: translate(-50%, -50%);
+        transition: top 0.5s ease-in-out;
         left: 50%;
         top: 50%;
         padding: 20px;
@@ -262,15 +268,18 @@
         box-shadow: 0px 0px 20px 10px rgba(127, 91, 24, 0.544);
         border-radius: 20px;
         width: 90%;
-        height: 80%;
+        height: 78.5%;
         z-index: 999;
+    }
+    #container.active {
+        top: 53.5%;
     }
     #bird {
         z-index: 1000;
         position: fixed;
         transform: translate(-50%, 0%);
         left: 50%;
-        bottom: -90px;
+        bottom: -100px;
         animation: pulse 3s infinite ease-in-out;
         
         img {
@@ -280,10 +289,10 @@
     }
     @keyframes pulse {
         0%, 100% {
-            bottom: -90px;
+            bottom: -100px;
         }
         50% {
-            bottom: -110px;
+            bottom: -120px;
         }
     }
 
@@ -324,18 +333,39 @@
         }
         border-radius: 30px;
     }
+
+    #streak {
+        position: fixed;
+        transform: translate(-50%, 0%);
+        left: 50%;
+        background-color: rgb(75, 33, 17);
+        padding: 0px 20px;
+        border-radius: 20px;
+        h3 {
+            transform: translateY(-3.5px);
+
+            span {
+                transform: translateY(3.5px);
+            }
+        }
+    }
 </style>
-<div id="container">
+{#if gameStatus == 1 || gameStatus == 2}
+<div id="streak" in:slide={{delay: 700}} out:slide>
+    <h3><span class="material-symbols-outlined">check_circle</span> {correctAnswers} <span class="material-symbols-outlined" translate="no">mode_heat</span> {streak}</h3>
+</div>
+{/if}
+<div id="container" class:active={gameStatus == 1 || gameStatus == 2}>
     {#if gameStatus == 1 || gameStatus == 2}
-    <div style:margin-top=5px transition:fade={{delay: 500}}>
-        <p style:font-weight=800>{timerString} <button class="pause" onclick={() => {if (timerMode == 1) { timerMode = 0} else {timerMode = 1}}}><span class="material-symbols-outlined">{#if timerMode}pause_circle{:else}play_circle{/if}</span></button></p>
+    <div style:margin-top=5px in:fade={{delay: 500}} out:fade>
+        <p style:font-weight=800>{timerString} <button class="pause" onclick={() => {if (timerMode == 1) { timerMode = 0} else {timerMode = 1}}}><span class="material-symbols-outlined" translate="no">{#if timerMode}pause_circle{:else}play_circle{/if}</span></button></p>
     </div>
     {/if}
     <div style:margin-top=20px>
         {#if gameStatus == 0}
         <div out:fade style:margin-top=60px>
             <h1>Japanese Vocabulary Game</h1>
-            <p>Let's learn Japanese!</p>
+            <p>Let's learn Japanese! Don't get questions wrong, or the bird gets angry...</p>
             <p><button onclick={function() {gameStatus = 0.5; setTimeout(() => {gameStatus = 1; timerMode = 1}, 500)}}>Start</button></p>
         </div>
         {/if}
@@ -346,9 +376,9 @@
             <div id="choices">
                 {#each round.choices as x}
                     {#if x == round.corr}
-                    <button class:correct={answerStatus == 1} disabled={answerStatus == 1} onclick={() => {progress(true)}}>{x}</button>
+                    <button class:correct={answerStatus == 1} disabled={answerStatus == 1 || timerMode == 0} onclick={() => {progress(true)}}>{x}</button>
                     {:else}
-                    <button class:incorrect={answerStatus == 1} disabled={answerStatus == 1} onclick={() => {progress(false)}}>{x}</button>
+                    <button class:incorrect={answerStatus == 1} disabled={answerStatus == 1 || timerMode == 0} onclick={() => {progress(false)}}>{x}</button>
                     {/if}
                 {/each}
             </div>

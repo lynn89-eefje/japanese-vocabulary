@@ -202,15 +202,21 @@
         setTimeout(function() {answerStatus = 1}, 500);
         if (correct) {
             setTimeout(function() {streak++; correctAnswers++}, 500);
-            setTimeout(()=> {answerStatus = 0; gameStatus = 2; generateRound()}, 2500);
-            setTimeout(function() {gameStatus = 1}, 3000);
+            setTimeout(()=> {if (gameStatus != 3) {answerStatus = 0; gameStatus = 2; generateRound()}}, 2500);
+            setTimeout(function() {if (gameStatus != 3) {gameStatus = 1}}, 3000);
+            setTimeout(function() {
+                if (streak > maxStreak) {
+                    maxStreak = streak;
+                    console.log("Max Streak", maxStreak);
+                }
+            }, 600)
         }
         else {
             setTimeout(function() {correctEmote = false}, 500)
             setTimeout(function() {streak = 0}, 1000)
             //console.log(correct);
-            setTimeout(()=> {answerStatus = 0; gameStatus = 2; generateRound()}, 3500);
-            setTimeout(function() {gameStatus = 1; correctEmote = true}, 4000);
+            setTimeout(()=> {if (gameStatus != 3) { answerStatus = 0; gameStatus = 2; generateRound() }}, 3500);
+            setTimeout(function() {if (gameStatus != 3) { gameStatus = 1; correctEmote = true }}, 4000);
             streak = 0;
         }
     }
@@ -236,6 +242,7 @@
         if (timer < -1) {
             timerMode = 0;
             gameStatus = 3;
+            correctEmote = 1;
         }
     }
     function convertTimerString() {
@@ -250,6 +257,7 @@
 
     let correctAnswers = $state(0);
     let streak = $state(0);
+    let maxStreak = $state(0);
 
 </script>
 <svelte:head>
@@ -385,7 +393,15 @@
         </div>
         {/if}
         {#if gameStatus == 3}
-        <h1>Great job!</h1>
+        <div style:margin-top=60px transition:fly={{delay: 500, y:200}}>
+            <h1>Great Job!</h1>
+            <h2 style="color: white; text-align: center;">Your highest streak was {maxStreak} <span style:transform="translateY(3px)" class="material-symbols-outlined">mode_heat</span></h2>
+            {#if correctAnswers != 1}
+            <p>{correctAnswers} correct answers <span class="material-symbols-outlined" style:transform="translateY(3px)">check_circle</span></p>
+            {:else}
+            <p>{correctAnswers} correct answer <span class="material-symbols-outlined" style:transform="translateY(6px)">check_circle</span></p>
+            {/if}
+        </div>
         {/if}
     </div>
 </div>

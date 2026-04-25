@@ -2,6 +2,7 @@
     import { base } from "$app/paths";
     import { fade, fly, slide } from "svelte/transition";
     import { onMount } from "svelte";
+    import { passive } from "svelte/legacy";
 
     // 48% of these words will be tested in pre-post
     let japanese = [
@@ -130,10 +131,19 @@
             "Difficult"
         ],
         [
-            "ちゃ",
-            "Tea"
+            "さかな",
+            "Fish"
+        ],
+        [
+            "とりにく",
+            "Chicken"
         ]
     ]
+
+    let assessed = [];
+    for (let i = 0;  i < japanese.length; i++) {
+        assessed.push(i);
+    }
 
     let gameStatus = $state(0);
     let answerStatus = $state(0);
@@ -145,8 +155,15 @@
     });
 
     function generateRound() {
+        if (assessed.length == 0) {
+            for (let i = 0;  i < japanese.length; i++) {
+                assessed.push(i);
+            }
+        }
         round.choices = [];
-        let rand = Math.floor((Math.random() * japanese.length));
+        let rand = Math.floor((Math.random() * assessed.length));
+        rand = assessed[rand];
+        assessed = assessed.filter((index) => index != rand);
         round.curr = japanese[rand][0];
         round.corr = japanese[rand][1];
 
@@ -169,7 +186,7 @@
                 }
             }
         }
-        console.log(round.choices);
+        //console.log(round.choices);
     }
 
     function checkChoices(choice) {
@@ -198,7 +215,36 @@
 
     onMount(() => {
         generateRound();
+        console.log(japanese.length + " words are on this game. If questions are completed every 10 seconds, there is an about " + (Math.floor((42/japanese.length)*100) + "% chance each word gets assessed"));
+        console.log(Math.floor((12/japanese.length)*100) + "% is tested on pre-post")
     })
+
+    let timerMode = $state(0);
+    let timer = $state(420); // Set to seconds
+    let timerString = $state("");
+    onMount(() => {
+        window.setInterval(timerCount, 1000);
+    })
+    function timerCount() {
+        if (timerMode == 1) {
+            timerString = convertTimerString();
+            console.log(timer);
+            timer--;
+            if (timer < 0) {
+                timerMode = 0;
+                gameStatus = 3;
+            }
+        }
+    }
+    function convertTimerString() {
+        let mins = Math.floor(timer/60);
+        let secs = timer%60;
+        if (secs <= 9) {
+            secs = "0" + secs;
+        }
+        let str = mins + ":" + secs;
+        return str;
+    }
 
 </script>
 <svelte:head>
@@ -226,8 +272,10 @@
         left: 50%;
         bottom: -90px;
         animation: pulse 3s infinite ease-in-out;
+        
         img {
             max-width: 300px;
+            transition: transform 0.3s ease-in-out;
         }
     }
     @keyframes pulse {
@@ -266,14 +314,29 @@
             transform: scale(1);
         }
     }
+
+    button.pause {
+        padding: 5px;
+        margin: 5px;
+        transform: translateY(3px);
+        span {
+            transform: translateY(2px)
+        }
+        border-radius: 30px;
+    }
 </style>
 <div id="container">
-    <div style:margin-top=60px>
+    {#if gameStatus == 1 || gameStatus == 2}
+    <div style:margin-top=5px transition:fade={{delay: 500}}>
+        <p style:font-weight=800>{timerString} <button class="pause" onclick={() => {if (timerMode == 1) { timerMode = 0} else {timerMode = 1}}}><span class="material-symbols-outlined">{#if timerMode}pause_circle{:else}play_circle{/if}</span></button></p>
+    </div>
+    {/if}
+    <div style:margin-top=20px>
         {#if gameStatus == 0}
-        <div out:fade>
+        <div out:fade style:margin-top=60px>
             <h1>Japanese Vocabulary Game</h1>
             <p>Let's learn Japanese!</p>
-            <p><button onclick={function() {gameStatus = 1;}}>Start</button></p>
+            <p><button onclick={function() {gameStatus = 0.5; setTimeout(() => {gameStatus = 1; timerMode = 1}, 500)}}>Start</button></p>
         </div>
         {/if}
         {#if gameStatus == 1}
@@ -290,6 +353,9 @@
                 {/each}
             </div>
         </div>
+        {/if}
+        {#if gameStatus == 3}
+        <h1>Great job!</h1>
         {/if}
     </div>
 </div>

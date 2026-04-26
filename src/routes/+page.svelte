@@ -287,6 +287,7 @@
 <svelte:head>
     <link rel="preload" as="image" href="{base}/images/imke.png"/>
     <link rel="preload" as="image" href="{base}/images/imkeAngry.png"/>
+    <title>Japanese Vocabulary Game</title>
 </svelte:head>
 <style>
     #container {

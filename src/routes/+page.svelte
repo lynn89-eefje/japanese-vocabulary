@@ -14,14 +14,6 @@
             "Blue"
         ],
         [
-            "しち",
-            "Seven"
-        ],
-        [
-            "きゅう",
-            "Nine"
-        ],
-        [
             "しろ",
             "White"
         ],
@@ -32,14 +24,6 @@
         [ 
             "こんにちは",
             "Hello"
-        ],
-        [
-            "きんようび",
-            "Friday"
-        ],
-        [
-            "どようび",
-            "Saturday"
         ],
         [
             "くがつ",
@@ -74,20 +58,12 @@
             "Juice"
         ],
         [
-            "ティー",
-            "Tea"
-        ],
-        [
             "マウンテン",
             "Mountain"
         ],
         [
             "オーシャン", 
             "Ocean"
-        ],
-        [
-            "ボート",
-            "Boat"
         ],
         [
             "火",
@@ -106,20 +82,12 @@
             "Milk"
         ],
         [
-            "とけい",
-            "Clock"
-        ],
-        [
             "ちいさい",
             "Small"
         ],
         [
             "むずかしい",
             "Difficult"
-        ],
-        [
-            "さかな",
-            "Fish"
         ],
         [
             "犬",
@@ -138,12 +106,44 @@
             "Chicken"
         ],
         [
-            "ハウス",
-            "House"
-        ],
-        [
             "刀",
             "Sword"
+        ],
+        [
+            "フクロウ",
+            "Owl"
+        ],
+        [
+            "石",
+            "Rock"
+        ],
+        [
+            "本",
+            "Book"
+        ],
+        [
+            "友人",
+            "Friend"
+        ],
+        [
+            "日本",
+            "Japan"
+        ],
+        [
+            "ライオン",
+            "Lion"
+        ],
+        [
+            "ペンギン",
+            "Penguin"
+        ],
+        [
+            "カレンダー",
+            "Calendar"
+        ],
+        [
+            "ライブラリ",
+            "Library"
         ]
     ]
 
@@ -194,6 +194,7 @@
             }
         }
         //console.log(round.choices);
+        totalQuestions++;
     }
 
     function checkChoices(choice) {
@@ -231,16 +232,26 @@
 
     onMount(() => {
         generateRound();
-        console.log(japanese.length + " words are on this game. If questions are completed every 10 seconds, there is an about " + (Math.floor((42/japanese.length)*100) + "% chance each word gets assessed"));
-        console.log(Math.floor((12/japanese.length)*100) + "% is tested on pre-post")
+        stat();
     })
+
+    function stat() {
+        let secondPer = 15;
+        let prepost = 15;
+        console.log(japanese.length + " words are on this game. If one question is completed every 15 seconds, there is an about " + (Math.floor(((420/15)/japanese.length)*100) + "% chance each word gets assessed"));
+        console.log(Math.floor((prepost/japanese.length)*100) + "% is tested on pre-post")
+    }
 
     let timerMode = $state(0);
     let timer = $state(420); // 7 minutes (60*7)
     let timerString = $state("");
+
+    let timerBreak;
+    /*
     onMount(() => {
-        window.setInterval(timerCount, 1000);
+        timerBreak = window.setInterval(timerCount, 1000);
     })
+    */
     function timerCount() {
         if (timerMode == 1) {
             timerString = convertTimerString();
@@ -251,6 +262,8 @@
             timerMode = 0;
             gameStatus = 3;
             correctEmote = 1;
+            console.log(totalQuestions + " questions completed");
+            window.clearInterval(timerBreak);
         }
     }
     function convertTimerString() {
@@ -266,6 +279,9 @@
     let correctAnswers = $state(0);
     let streak = $state(0);
     let maxStreak = $state(0);
+
+    // Testing
+    let totalQuestions = $state(0);
 
 </script>
 <svelte:head>
@@ -381,8 +397,8 @@
         {#if gameStatus == 0}
         <div out:fade style:margin-top=60px>
             <h1>Japanese Vocabulary Game</h1>
-            <p>Let's learn Japanese Kanji! Don't get questions wrong, or the bird gets angry...</p>
-            <p><button onclick={function() {gameStatus = 0.5; setTimeout(() => {gameStatus = 1; timerMode = 1}, 500)}}>Start</button></p>
+            <p>Let's learn Japanese! Don't get questions wrong, or the bird gets angry...</p>
+            <p><button onclick={function() {gameStatus = 0.5; setTimeout(() => {timerBreak = window.setInterval(timerCount, 1000); gameStatus = 1; timerMode = 1}, 500)}}>Start</button></p>
         </div>
         {/if}
         {#if gameStatus == 1}

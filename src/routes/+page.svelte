@@ -26,20 +26,12 @@
             "White"
         ],
         [
-            "なん",
-            "Minute"
-        ],
-        [
             "くろ",
             "Black"
         ],
         [ 
             "こんにちは",
-            "Good Afternoon"
-        ],
-        [
-            "ようび",
-            "Day of the Week"
+            "Hello"
         ],
         [
             "きんようび",
@@ -66,12 +58,8 @@
             "Pink"
         ],
         [
-            "犬",
-            "Dog"
-        ],
-        [
             "ナイト",
-            "Night"
+            "Knight"
         ],
         [
             "キノコ",
@@ -134,8 +122,28 @@
             "Fish"
         ],
         [
+            "犬",
+            "Dog"
+        ],
+        [
+            "くま",
+            "Bear"
+        ],
+        [
+            "ウサギ",
+            "Rabbit"
+        ],
+        [
             "とりにく",
             "Chicken"
+        ],
+        [
+            "ハウス",
+            "House"
+        ],
+        [
+            "刀",
+            "Sword"
         ]
     ]
 
@@ -207,7 +215,7 @@
             setTimeout(function() {
                 if (streak > maxStreak) {
                     maxStreak = streak;
-                    console.log("Max Streak", maxStreak);
+                    //console.log("Max Streak", maxStreak);
                 }
             }, 600)
         }
@@ -228,7 +236,7 @@
     })
 
     let timerMode = $state(0);
-    let timer = $state(420);
+    let timer = $state(420); // 7 minutes (60*7)
     let timerString = $state("");
     onMount(() => {
         window.setInterval(timerCount, 1000);
@@ -344,7 +352,7 @@
 
     #streak {
         position: fixed;
-        transform: translate(-50%, 0%);
+        transform: translate(-50%, 2%);
         left: 50%;
         background-color: rgb(75, 33, 17);
         padding: 0px 20px;
@@ -373,7 +381,7 @@
         {#if gameStatus == 0}
         <div out:fade style:margin-top=60px>
             <h1>Japanese Vocabulary Game</h1>
-            <p>Let's learn Japanese! Don't get questions wrong, or the bird gets angry...</p>
+            <p>Let's learn Japanese Kanji! Don't get questions wrong, or the bird gets angry...</p>
             <p><button onclick={function() {gameStatus = 0.5; setTimeout(() => {gameStatus = 1; timerMode = 1}, 500)}}>Start</button></p>
         </div>
         {/if}
@@ -394,12 +402,16 @@
         {/if}
         {#if gameStatus == 3}
         <div style:margin-top=60px transition:fly={{delay: 500, y:200}}>
+            {#if correctAnswers == 0}
+            <h1>You'll do better next time</h1>
+            {:else}
             <h1>Great Job!</h1>
+            {/if}
             <h2 style="color: white; text-align: center;">Your highest streak was {maxStreak} <span style:transform="translateY(3px)" class="material-symbols-outlined">mode_heat</span></h2>
             {#if correctAnswers != 1}
-            <p>{correctAnswers} correct answers <span class="material-symbols-outlined" style:transform="translateY(3px)">check_circle</span></p>
+            <p>{correctAnswers} correct answers <span class="material-symbols-outlined" style:transform="translateY(7.5px)">check_circle</span></p>
             {:else}
-            <p>{correctAnswers} correct answer <span class="material-symbols-outlined" style:transform="translateY(6px)">check_circle</span></p>
+            <p>{correctAnswers} correct answer <span class="material-symbols-outlined" style:transform="translateY(8px)">check_circle</span></p>
             {/if}
         </div>
         {/if}
